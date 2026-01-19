@@ -1,0 +1,50 @@
+// Add this at the end of auth.js, just before module.exports = router;
+
+// Reception Agent: Add new patient (no verification required)
+router.post('/add-patient', authMiddleware, receptionMiddleware, async (req, res) => {
+  try {
+    const { name, familyName, email, password } = req.body;
+
+    // Validation
+    if (!name || !familyName || !email || !password) {
+      return res.status(400).json({ message: 'All fields are required' });
+    }
+
+    if (password.length < 6) {
+      return res.status(400).json({ message: 'Password must be at least 6 characters long' });
+    }
+
+    // Check if user already exists
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ message: 'User already exists with this email' });
+    }
+
+    // Create new patient (verified by default, no email verification needed)
+    const user = new User({
+      name,
+      familyName,
+      email,
+      password,
+      role: 'Patient',
+      isVerified: true, // Pre-verified by reception
+    });
+
+    await user.save();
+
+    res.status(201).json({
+      message: 'Patient added successfully',
+      patient: {
+        id: user._id,
+        name: user.name,
+        familyName: user.familyName,
+        email: user.email,
+        role: user.role,
+      }
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
