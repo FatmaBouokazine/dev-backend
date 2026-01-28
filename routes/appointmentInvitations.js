@@ -27,7 +27,7 @@ const doctorMiddleware = (req, res, next) => {
 router.get('/doctors/all', authMiddleware, patientMiddleware, async (req, res) => {
   try {
     const doctors = await User.find({ role: 'Doctor' })
-      .select('name familyName email specialization')
+      .select('name familyName email speciality')
       .sort({ name: 1 });
     
     // Get existing invitations from this patient
@@ -57,7 +57,7 @@ router.get('/doctors/all', authMiddleware, patientMiddleware, async (req, res) =
       name: doctor.name,
       familyName: doctor.familyName,
       email: doctor.email,
-      specialization: doctor.specialization,
+      speciality: doctor.speciality,
       invitationStatus: invitationMap[doctor._id.toString()] || 'none',
       isConnected: connectionSet.has(doctor._id.toString())
     }));
@@ -117,7 +117,7 @@ router.post('/send', authMiddleware, patientMiddleware, async (req, res) => {
 router.get('/my-invitations', authMiddleware, patientMiddleware, async (req, res) => {
   try {
     const invitations = await AppointmentInvitation.find({ patient: req.user.userId })
-      .populate('doctor', 'name familyName email specialization')
+      .populate('doctor', 'name familyName email speciality')
       .sort({ createdAt: -1 });
     
     res.json(invitations);

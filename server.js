@@ -12,6 +12,7 @@ const medicalRecordsRoutes = require('./routes/medicalRecords');
 const notificationsRoutes = require('./routes/notifications');
 const receptionAgentsRoutes = require('./routes/receptionAgents');
 const appointmentInvitationsRoutes = require('./routes/appointmentInvitations');
+const healthAssessmentRoutes = require('./routes/healthAssessment');
 
 const app = express();
 
@@ -20,9 +21,15 @@ app.use(cors());
 app.use(express.json());
 
 // MongoDB connection
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/medflow')
-.then(() => console.log('MongoDB connected'))
-.catch(err => console.log(err));
+mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/medflow', {
+  serverSelectionTimeoutMS: 5000,
+  socketTimeoutMS: 45000,
+})
+.then(() => console.log('MongoDB connected successfully'))
+.catch(err => {
+  console.error('MongoDB connection error:', err.message);
+  console.log('Falling back to local MongoDB...');
+});
 
 // Mount routes
 app.use('/api/auth', authRoutes);
@@ -32,6 +39,7 @@ app.use('/api/medical-records', medicalRecordsRoutes);
 app.use('/api/notifications', notificationsRoutes);
 app.use('/api/reception-agents', receptionAgentsRoutes);
 app.use('/api/appointment-invitations', appointmentInvitationsRoutes);
+app.use('/api/health-assessment', healthAssessmentRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {

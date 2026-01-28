@@ -53,11 +53,11 @@ router.get('/:patientId', authMiddleware, async (req, res) => {
     }
     
     let medicalRecord = await MedicalRecord.findOne({ patient: patientId })
-      .populate('appointments.doctor', 'name familyName')
-      .populate('prescriptions.doctor', 'name familyName')
-      .populate('diseases.doctor', 'name familyName')
-      .populate('comments.doctor', 'name familyName')
-      .populate('diagnostics.doctor', 'name familyName');
+      .populate('appointments.doctor', 'name familyName speciality')
+      .populate('prescriptions.doctor', 'name familyName speciality')
+      .populate('diseases.doctor', 'name familyName speciality')
+      .populate('comments.doctor', 'name familyName speciality')
+      .populate('diagnostics.doctor', 'name familyName speciality');
     
     if (!medicalRecord) {
       // Create empty record if it doesn't exist
@@ -145,7 +145,7 @@ router.post('/:patientId/appointment', authMiddleware, async (req, res) => {
     });
     
     await medicalRecord.save();
-    await medicalRecord.populate('appointments.doctor', 'name familyName');
+    await medicalRecord.populate('appointments.doctor', 'name familyName speciality');
     
     // Send notification to patient
     const doctor = await User.findById(assignedDoctorId).select('name familyName');
@@ -209,7 +209,7 @@ router.put('/:patientId/appointment/:appointmentId', authMiddleware, async (req,
     if (notes !== undefined) appointment.notes = notes;
     
     await medicalRecord.save();
-    await medicalRecord.populate('appointments.doctor', 'name familyName');
+    await medicalRecord.populate('appointments.doctor', 'name familyName speciality');
     
     // Send notification to patient
     const doctor = await User.findById(appointment.doctor).select('name familyName');
@@ -320,7 +320,7 @@ router.post('/:patientId/prescription', authMiddleware, async (req, res) => {
     });
     
     await medicalRecord.save();
-    await medicalRecord.populate('prescriptions.doctor', 'name familyName');
+    await medicalRecord.populate('prescriptions.doctor', 'name familyName speciality');
     
     // Send notification to patient
     const doctor = await User.findById(req.user.userId).select('name familyName');
@@ -370,7 +370,7 @@ router.put('/:patientId/prescription/:prescriptionId', authMiddleware, async (re
     if (instructions !== undefined) prescription.instructions = instructions;
     
     await medicalRecord.save();
-    await medicalRecord.populate('prescriptions.doctor', 'name familyName');
+    await medicalRecord.populate('prescriptions.doctor', 'name familyName speciality');
     
     // Send notification to patient
     const doctor = await User.findById(req.user.userId).select('name familyName');
@@ -465,7 +465,7 @@ router.post('/:patientId/disease', authMiddleware, async (req, res) => {
     });
     
     await medicalRecord.save();
-    await medicalRecord.populate('diseases.doctor', 'name familyName');
+    await medicalRecord.populate('diseases.doctor', 'name familyName speciality');
     
     // Send notification to patient
     const doctor = await User.findById(req.user.userId).select('name familyName');
@@ -515,7 +515,7 @@ router.put('/:patientId/disease/:diseaseId', authMiddleware, async (req, res) =>
     if (notes !== undefined) disease.notes = notes;
     
     await medicalRecord.save();
-    await medicalRecord.populate('diseases.doctor', 'name familyName');
+    await medicalRecord.populate('diseases.doctor', 'name familyName speciality');
     
     // Send notification to patient
     const doctor = await User.findById(req.user.userId).select('name familyName');
@@ -607,7 +607,7 @@ router.post('/:patientId/comment', authMiddleware, async (req, res) => {
     });
     
     await medicalRecord.save();
-    await medicalRecord.populate('comments.doctor', 'name familyName');
+    await medicalRecord.populate('comments.doctor', 'name familyName speciality');
     
     // Send notification to patient
     const doctor = await User.findById(req.user.userId).select('name familyName');
@@ -654,7 +654,7 @@ router.put('/:patientId/comment/:commentId', authMiddleware, async (req, res) =>
     if (text) comment.text = text;
     
     await medicalRecord.save();
-    await medicalRecord.populate('comments.doctor', 'name familyName');
+    await medicalRecord.populate('comments.doctor', 'name familyName speciality');
     
     // Send notification to patient
     const doctor = await User.findById(req.user.userId).select('name familyName');
@@ -749,7 +749,7 @@ router.post('/:patientId/diagnostic', authMiddleware, async (req, res) => {
     });
     
     await medicalRecord.save();
-    await medicalRecord.populate('diagnostics.doctor', 'name familyName');
+    await medicalRecord.populate('diagnostics.doctor', 'name familyName speciality');
     
     // Send notification to patient
     const doctor = await User.findById(req.user.userId).select('name familyName');
@@ -799,7 +799,7 @@ router.put('/:patientId/diagnostic/:diagnosticId', authMiddleware, async (req, r
     if (notes !== undefined) diagnostic.notes = notes;
     
     await medicalRecord.save();
-    await medicalRecord.populate('diagnostics.doctor', 'name familyName');
+    await medicalRecord.populate('diagnostics.doctor', 'name familyName speciality');
     
     // Send notification to patient
     const doctor = await User.findById(req.user.userId).select('name familyName');

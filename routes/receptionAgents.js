@@ -136,7 +136,7 @@ router.get('/my-doctors', authMiddleware, receptionAgentMiddleware, async (req, 
     const acceptedInvitations = await DoctorReceptionAgent.find({
       receptionAgent: req.user.userId,
       status: 'accepted'
-    }).populate('doctor', 'name familyName email');
+    }).populate('doctor', 'name familyName email speciality');
     
     const doctors = acceptedInvitations.map(invitation => invitation.doctor);
     
@@ -163,7 +163,7 @@ router.get('/patients', authMiddleware, receptionAgentMiddleware, async (req, re
       status: 'accepted'
     })
     .populate('patient', 'name familyName email')
-    .populate('doctor', 'name familyName');
+    .populate('doctor', 'name familyName speciality');
     
     res.json(doctorPatients.map(dp => ({
       ...dp.patient._doc,
@@ -180,7 +180,7 @@ router.get('/invitations/pending', authMiddleware, receptionAgentMiddleware, asy
     const pendingInvitations = await DoctorReceptionAgent.find({
       receptionAgent: req.user.userId,
       status: 'pending'
-    }).populate('doctor', 'name familyName email');
+    }).populate('doctor', 'name familyName email speciality');
     
     res.json(pendingInvitations);
   } catch (error) {
@@ -194,7 +194,7 @@ router.get('/invitations/all', authMiddleware, receptionAgentMiddleware, async (
     const invitations = await DoctorReceptionAgent.find({
       receptionAgent: req.user.userId
     })
-    .populate('doctor', 'name familyName email')
+    .populate('doctor', 'name familyName email speciality')
     .sort({ createdAt: -1 });
     
     res.json(invitations);

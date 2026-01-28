@@ -9,11 +9,15 @@ const router = express.Router();
 // Register route
 router.post('/register', async (req, res) => {
   try {
-    const { name, familyName, email, password, confirmPassword, role } = req.body;
+    const { name, familyName, email, password, confirmPassword, role, speciality } = req.body;
 
     // Validation
     if (!name || !familyName || !email || !password || !confirmPassword || !role) {
       return res.status(400).json({ message: 'All fields are required' });
+    }
+
+    if (role === 'Doctor' && !speciality) {
+      return res.status(400).json({ message: 'Speciality is required for doctors' });
     }
 
     if (password !== confirmPassword) {
@@ -60,6 +64,7 @@ router.post('/register', async (req, res) => {
       email,
       password,
       role,
+      speciality,
       isVerified: false,
       verificationCode: verificationCode,
       verificationCodeExpires: new Date(Date.now() + 10 * 60 * 1000) // 10 minutes
@@ -242,7 +247,7 @@ router.get('/profile', authMiddleware, async (req, res) => {
 // Update profile (protected)
 router.put('/profile', authMiddleware, async (req, res) => {
   try {
-    const { name, familyName, email } = req.body;
+    const { name, familyName, email, speciality } = req.body;
     const userId = req.user.userId;
     const userRole = req.user.role;
 
@@ -264,6 +269,11 @@ router.put('/profile', authMiddleware, async (req, res) => {
       if (familyName !== undefined) user.familyName = familyName;
     }
 
+    // Doctors can update speciality
+    if (userRole === 'Doctor' && speciality !== undefined) {
+      user.speciality = speciality;
+    }
+
     // Email change validation
     if (email && email !== user.email) {
       const existingUser = await User.findOne({ email });
@@ -283,6 +293,7 @@ router.put('/profile', authMiddleware, async (req, res) => {
         familyName: user.familyName,
         email: user.email,
         role: user.role,
+        speciality: user.speciality,
         isVerified: user.isVerified,
         createdAt: user.createdAt
       }

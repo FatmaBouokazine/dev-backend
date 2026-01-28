@@ -29,6 +29,11 @@ const userSchema = new mongoose.Schema({
     required: true,
     enum: ['Doctor', 'Patient', 'Reception Agent', 'Admin']
   },
+  speciality: {
+    type: String,
+    required: function() { return this.role === 'Doctor'; },
+    trim: true
+  },
   isVerified: {
     type: Boolean,
     default: false

@@ -246,7 +246,7 @@ router.get('/requests/pending', authMiddleware, async (req, res) => {
     const pendingRequests = await DoctorRequest.find({
       patient: req.user.userId,
       status: 'pending'
-    }).populate('doctor', 'name familyName email');
+    }).populate('doctor', 'name familyName email speciality');
     
     res.json(pendingRequests);
   } catch (error) {
@@ -264,7 +264,7 @@ router.get('/requests/all', authMiddleware, async (req, res) => {
     const requests = await DoctorRequest.find({
       patient: req.user.userId
     })
-    .populate('doctor', 'name familyName email')
+    .populate('doctor', 'name familyName email speciality')
     .sort({ createdAt: -1 });
     
     res.json(requests);
