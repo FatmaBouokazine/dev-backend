@@ -144,8 +144,6 @@ const healthAssessmentSchema = new mongoose.Schema({
   }
 });
 
-healthAssessmentSchema.index({ patient: 1 });
-
 const HealthAssessment = mongoose.model('HealthAssessment', healthAssessmentSchema);
 
 module.exports = HealthAssessment;

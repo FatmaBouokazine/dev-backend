@@ -13,12 +13,38 @@ const notificationsRoutes = require('./routes/notifications');
 const receptionAgentsRoutes = require('./routes/receptionAgents');
 const appointmentInvitationsRoutes = require('./routes/appointmentInvitations');
 const healthAssessmentRoutes = require('./routes/healthAssessment');
+const client = require("prom-client");
+
 
 const app = express();
+// Collect default Node.js metrics (CPU, memory, etc.)
+client.collectDefaultMetrics();
+
+// Add HTTP request duration metric
+const httpRequestDurationSeconds = new client.Histogram({
+  name: "http_request_duration_seconds",
+  help: "Duration of HTTP requests in seconds",
+  labelNames: ["method", "route", "status"],
+});
 
 // Middleware
 app.use(cors());
 app.use(express.json());
+
+// Middleware to track HTTP requests
+app.use((req, res, next) => {
+  const end = httpRequestDurationSeconds.startTimer();
+
+  res.on("finish", () => {
+    end({
+      method: req.method,
+      route: req.path,
+      status: res.statusCode,
+    });
+  });
+
+  next();
+});
 
 // MongoDB connection
 mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/medflow', {
@@ -44,6 +70,12 @@ app.use('/api/health-assessment', healthAssessmentRoutes);
 // Health check endpoint
 app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', message: 'Medflow API is running' });
+});
+
+// Metrics endpoint
+app.get("/metrics", async (req, res) => {
+  res.set("Content-Type", client.register.contentType);
+  res.end(await client.register.metrics());
 });
 
 // 404 handler - must be after all other routes
