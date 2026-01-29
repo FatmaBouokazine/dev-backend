@@ -9,41 +9,30 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ Récupérer le code depuis le repo
-      - name: Checkout code
-        uses: actions/checkout@v3
+    - name: Checkout code
+      uses: actions/checkout@v3
 
-      # 2️⃣ Installer Node.js
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18'
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
 
-      # 3️⃣ Installer les dépendances
-      - name: Install dependencies
-        run: npm install
+    - name: Install dependencies and run tests
+      run: |
+        npm install
+        npm test || echo "No tests defined, skipping..."
 
-      # 4️⃣ Lancer les tests (actuellement un echo)
-      - name: Run tests
-        run: npm test || echo "No tests defined, skipping..."
+    - name: Build Docker image
+      run: |
+        docker build -t my-backend:latest .
 
-      # 5️⃣ Construire l'image Docker
-      - name: Build Docker image
-        run: docker build -t my-backend:latest .
+    - name: Login Docker Hub
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
 
-      # 6️⃣ Se connecter à Docker Hub
-      - name: Login Docker Hub
-        uses: docker/login-action@v2
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-
-      # 7️⃣ Taguer et pousser l'image Docker
-      - name: Push Docker image
-        run: |
-          docker tag my-backend:latest mydockerhubuser/my-backend:latest
-          docker push mydockerhubuser/my-backend:latest
-
-      # 8️⃣ Optionnel : notifier le succès
-      - name: Success message
-        run: echo "✅ CI/CD pipeline completed successfully!"
+    - name: Push Docker image
+      run: |
+        docker tag my-backend:latest mydockerhubuser/my-backend:latest
+        docker push mydockerhubuser/my-backend:latest
